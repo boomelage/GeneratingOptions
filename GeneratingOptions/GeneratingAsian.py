@@ -45,8 +45,6 @@ class GeneratingAsian:
 		return barrier_features
 
 	def Generate(self):
-		total = self.df.shape[0]
-		counter = 0 
 		def row_generate_barrier_features(row):
 			s = row['spot_price']
 			calculation_date = row['calculation_date']
@@ -85,5 +83,5 @@ class GeneratingAsian:
 			features[prices.columns] = prices
 			print(features)
 			features.to_csv(os.path.join(self.output_dir,f'{calculation_date.strftime('%Y-%m-%d_%H%M%S%f')}_{(str(int(s*100))).replace('_','')} SPX barrier options.csv'))
-			print(f"{date_print}:  {counter}/{total}")
+			print(f"{date_print}^")
 		Parallel(n_jobs=os.cpu_count()//4)(delayed(row_generate_barrier_features)(row) for _, row in self.df.iterrows())

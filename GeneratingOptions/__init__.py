@@ -1,1 +1,1 @@
-from .GeneratingAsians import GeneratingAsians
+from .GeneratingAsian import GeneratingAsian
