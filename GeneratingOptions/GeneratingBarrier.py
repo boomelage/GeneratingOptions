@@ -9,7 +9,7 @@ from quantlib_pricers import barriers
 from datetime import datetime
 from joblib import Parallel, delayed
 
-class GeneratingAsian:
+class GeneratingBarrier:
 	def __init__(self):
 		ms.find_root(Path())
 		ms.collect_spx_calibrations()
@@ -25,6 +25,8 @@ class GeneratingAsian:
 		self.df['calculation_date'] = pd.to_datetime(self.df['calculation_date'],format='mixed')
 		self.df = self.df.sort_values(by='calculation_date',ascending=True).reset_index(drop=True)
 		self.computed_outputs = len([f for f in os.listdir(self.output_dir) if f.endswith('.csv')])
+		self.sT0 = df.iloc[0,'spot_price']
+		self.KT0 =  np.linspace(self.sT0*0.9,self.sT0*1.1,10)
 		print(self.computed_outputs)
 		self.df = self.df.iloc[self.computed_outputs:].copy()
 		print(self.df['calculation_date'].drop_duplicates().reset_index(drop=True))
@@ -54,7 +56,6 @@ class GeneratingAsian:
 				calculation_date.day
 			).strftime('%A, %Y-%m-%d')
 			rebate = 0.
-			step = 1
 			K = np.linspace(
 				s*0.9,
 				s*1.1,
@@ -81,7 +82,7 @@ class GeneratingAsian:
 			features['date'] = calculation_date.floor('D')
 			prices = pd.DataFrame(barriers.df_barrier_price(features))
 			features[prices.columns] = prices
-			print(features)
+			print(features[['calculation_date']+prices.columns.tolist()])
 			features.to_csv(os.path.join(self.output_dir,f'{calculation_date.strftime('%Y-%m-%d_%H%M%S%f')}_{(str(int(s*100))).replace('_','')} SPX barrier options.csv'))
-			print(f"{date_print}^")
+			print(f"{calculation_date}^")
 		Parallel(n_jobs=os.cpu_count()//4)(delayed(row_generate_barrier_features)(row) for _, row in self.df.iterrows())
