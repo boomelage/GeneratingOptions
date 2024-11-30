@@ -8,7 +8,6 @@ from model_settings import ms
 from quantlib_pricers import barriers
 from datetime import datetime
 from joblib import Parallel, delayed
-from tqdm import tqdm
 
 class GeneratingAsian:
 	def __init__(self):
@@ -24,10 +23,11 @@ class GeneratingAsian:
 		if not os.path.exists(self.output_dir):
 			os.mkdir(self.output_dir)
 		self.df['calculation_date'] = pd.to_datetime(self.df['calculation_date'],format='mixed')
-		self.df = self.df.sort_values(by='calculation_date',ascending=False).reset_index(drop=True)
+		self.df = self.df.sort_values(by='calculation_date',ascending=True).reset_index(drop=True)
 		self.computed_outputs = len([f for f in os.listdir(self.output_dir) if f.endswith('.csv')])
 		print(self.computed_outputs)
 		self.df = self.df.iloc[self.computed_outputs:].copy()
+		print(self.df['calculation_date'].drop_duplicates().reset_index(drop=True))
 
 
 	def generate_barrier_features(self, s, K, T, barriers, OUTIN, W):
